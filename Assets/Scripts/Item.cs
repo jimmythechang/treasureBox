@@ -1,15 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Item : MonoBehaviour {
     /*
      * Calculation of the z-distance between the object and the Camera.
      */
     private float zDiff;
-
-    private bool isDragging;
-    private bool isRotating;
 
     private float initialZRotation;
     private float initialMouseAngleRelativeToObject;
@@ -18,59 +13,63 @@ public class Item : MonoBehaviour {
     private enum State { DRAGGING, ROTATING, UNTOUCHED };
     private State state = State.UNTOUCHED;
 
+    public bool isInChest { get; set; }
+
+    private GameObject chest;
 
 	void Start () {
-        isDragging = false;
         zDiff = transform.position.z - Camera.main.transform.position.z;
+        chest = GameObject.FindGameObjectWithTag("Chest");
 	}
 	
 	void Update () {
         switch (state) {
             case State.DRAGGING: {
-                if (Input.GetMouseButtonUp(0)) {
-                    state = State.UNTOUCHED;
-                    break;
-                }
                 dragItem();
                 break;
             }
             case State.ROTATING: {
-                if (Input.GetMouseButtonUp(1)) {
-                    state = State.UNTOUCHED;
-                    break;
-                }
                 rotateItem();
                 break;
             }
             default: {
-                if (Input.GetMouseButtonDown(0) && mouseOverItem()) {
-                    offset = calculateOffset();
-                    state = State.DRAGGING;
-                }
-                else if (Input.GetMouseButtonDown(1) && mouseOverItem()) {
-                    /*
-                     * Set the initial orientation of the Item and the initial angle of the mouse
-                     * relative to that orientation.
-                     */
-                    initialZRotation = transform.eulerAngles.z;
-                    initialMouseAngleRelativeToObject = calculateAngleOfMouseRelativeToGameObject();
-                    state = State.ROTATING;
-                }
                 break;
             }
         }
 	}
 
     /**
-     * Determines if the mouse's position is over an Item.
+     * Action to execute if the Item is clicked on with the left mouse button.
      */
-    protected bool mouseOverItem() {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-        if (hit) {
-            return hit.collider.Equals(GetComponent<PolygonCollider2D>());
+    protected void leftClick() {
+        offset = calculateOffset();
+        state = State.DRAGGING;
+    }
+
+    /**
+     * Action to execute if the Item is clicked on with the right mouse button.
+     */
+    protected void rightClick() {
+        /*
+         * Set the initial orientation of the Item and the initial angle of the mouse
+         * relative to that orientation.
+         */
+        initialZRotation = transform.eulerAngles.z;
+        initialMouseAngleRelativeToObject = calculateAngleOfMouseRelativeToGameObject();
+        state = State.ROTATING;
+    }
+
+    /**
+     * Action to execute if the Item is no longer being handled by the Player.
+     */
+    public void release() {
+        state = State.UNTOUCHED;
+        if (isWithinChest()) {
+            gameObject.GetComponent<Renderer>().material.color = Color.green;
         }
-        return false;
+        else {
+            gameObject.GetComponent<Renderer>().material.color = Color.white;
+        }
     }
 
     /**
@@ -100,6 +99,15 @@ public class Item : MonoBehaviour {
         float angle = calculateAngleOfMouseRelativeToGameObject();
         float zRotation = (initialZRotation + (angle - initialMouseAngleRelativeToObject)) % 360;
         transform.eulerAngles = new Vector3(0, 0, zRotation);
+    }
+
+    /**
+     * Determines if an Item is fully tucked away in the Chest.
+     */
+    protected bool isWithinChest() {
+        Bounds itemBounds = GetComponent<PolygonCollider2D>().bounds;
+        Bounds chestBounds = chest.GetComponent<BoxCollider>().bounds;
+        return chestBounds.Contains(itemBounds.min) && chestBounds.Contains(itemBounds.max); 
     }
 
 }
