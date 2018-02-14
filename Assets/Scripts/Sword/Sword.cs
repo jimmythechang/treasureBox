@@ -3,7 +3,7 @@
 public class Sword : Item {
 
     private Blade blade;
-    public bool movementConstrained = true;
+    public bool movementConstrained { get; set; }
 
     private Vector2 unitVector;
 
@@ -11,6 +11,7 @@ public class Sword : Item {
         base.Start();
         blade = GetComponentInChildren<Blade>();
         calculateUnitVector();
+        movementConstrained = false;
     }
 
     protected override void leftClick() {
@@ -34,9 +35,11 @@ public class Sword : Item {
     protected override void rotateItem() {
         base.rotateItem();
         calculateUnitVector();
-        Debug.Log(unitVector);
     }
 
+    /**
+     * Calculates the unit vector facing in the direction that the blade is pointing.
+     */
     private void calculateUnitVector() {
         Transform colliderTransform = blade.GetComponent<CircleCollider2D>().transform;
         unitVector = new Vector2(colliderTransform.position.x - transform.position.x, colliderTransform.position.y - transform.position.y);

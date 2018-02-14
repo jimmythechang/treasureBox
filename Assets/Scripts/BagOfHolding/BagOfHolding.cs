@@ -1,17 +1,17 @@
 ﻿using UnityEngine;
+using System.Collections;
 
-public class Blade : MonoBehaviour {
+public class BagOfHolding : Item {
 
-    private Sword sword;
+    public bool swordInserted { get; set; }
 
     // Use this for initialization
     void Start() {
-        sword = GetComponentInParent<Sword>();
+
     }
 
     // Update is called once per frame
     void Update() {
 
     }
-
 }

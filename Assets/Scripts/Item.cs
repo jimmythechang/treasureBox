@@ -14,12 +14,14 @@ public class Item : MonoBehaviour {
     protected State state = State.UNTOUCHED;
 
     public bool isInChest { get; set; }
+    public bool isTouchingAnotherItem { get; set; }
 
     private GameObject chest;
 
     protected virtual void Start() {
         zDiff = transform.position.z - Camera.main.transform.position.z;
         chest = GameObject.FindGameObjectWithTag("Chest");
+        isTouchingAnotherItem = false;
     }
 
     protected virtual void Update() {
@@ -44,6 +46,7 @@ public class Item : MonoBehaviour {
     protected virtual void leftClick() {
         offset = calculateOffset();
         state = State.DRAGGING;
+        setItemSortingOrder(10);
     }
 
     /**
@@ -64,12 +67,23 @@ public class Item : MonoBehaviour {
      */
     public void release() {
         state = State.UNTOUCHED;
-        if (gameObject.GetComponent<Renderer>()) {
-            if (isWithinChest()) {
-                gameObject.GetComponent<Renderer>().material.color = Color.green;
-            }
-            else {
-                gameObject.GetComponent<Renderer>().material.color = Color.white;
+        isInChest = isWithinChest();
+        setItemSortingOrder(0);
+    }
+
+    /**
+     * Sets the sorting order for all SpriteRenderers associated with this Item, 
+     * including those of its children.
+     */
+    private void setItemSortingOrder(int sortingOrder) {
+        if (gameObject.GetComponent<SpriteRenderer>() != null) {
+            gameObject.GetComponent<SpriteRenderer>().sortingOrder = sortingOrder;
+        }
+
+        if (gameObject.GetComponentsInChildren<SpriteRenderer>().Length > 0) {
+            SpriteRenderer[] renderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
+            for (int i = 0; i < renderers.Length; i++) {
+                renderers[i].sortingOrder = sortingOrder;
             }
         }
     }
@@ -113,6 +127,19 @@ public class Item : MonoBehaviour {
         return chestBounds.Contains(itemBounds.min) && chestBounds.Contains(itemBounds.max);
     }
 
+    protected void OnTriggerStay2D(Collider2D collision) {
+        if (gameObject.GetComponent<Renderer>() != null) {
+            gameObject.GetComponent<Renderer>().material.color = Color.red;
+        }
+        isTouchingAnotherItem = true;
+    }
+
+    protected void OnTriggerExit2D(Collider2D collision) {
+        if (gameObject.GetComponent<Renderer>() != null) {
+            gameObject.GetComponent<Renderer>().material.color = Color.white;
+        }
+        isTouchingAnotherItem = false;
+    }
     /**
      * Converts the mouse's screen coordinates to an in-game position.
      */
