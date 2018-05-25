@@ -33,15 +33,17 @@ public class Sword : Item {
     }
 
     protected override void rotateItem() {
-        base.rotateItem();
-        calculateUnitVector();
+        if (!movementConstrained) {
+            base.rotateItem();
+            calculateUnitVector();
+        }
     }
 
     /**
      * Calculates the unit vector facing in the direction that the blade is pointing.
      */
     private void calculateUnitVector() {
-        Transform colliderTransform = blade.GetComponent<CircleCollider2D>().transform;
+        Transform colliderTransform = blade.GetComponentInChildren<CircleCollider2D>().transform;
         unitVector = new Vector2(colliderTransform.position.x - transform.position.x, colliderTransform.position.y - transform.position.y);
         unitVector.Normalize();
     }
@@ -54,5 +56,14 @@ public class Sword : Item {
         Vector3 mouseGamePosition = calculateMouseGamePosition();
         Vector2 mouseVector = new Vector2(mouseGamePosition.x - transform.position.x, mouseGamePosition.y - transform.position.y);
         return Vector2.Dot(unitVector, mouseVector) * unitVector;
+    }
+
+    /**
+     * Constrains the sword along the axis of the bag. 
+     */
+    public void lockSword(float bagAngle) {
+        offset = calculateProjectedMouseVectorOntoUnitVector();
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, bagAngle + 180);
+        movementConstrained = true;
     }
 }
