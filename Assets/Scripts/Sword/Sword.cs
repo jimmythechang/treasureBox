@@ -61,9 +61,10 @@ public class Sword : Item {
     /**
      * Constrains the sword along the axis of the bag. 
      */
-    public void lockSword(float bagAngle) {
-        offset = calculateProjectedMouseVectorOntoUnitVector();
+    public void lockSword(float bagAngle, Vector3 position) {
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, bagAngle + 180);
+        transform.position = position;
         movementConstrained = true;
+        offset = calculateProjectedMouseVectorOntoUnitVector();
     }
 }

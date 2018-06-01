@@ -30,17 +30,12 @@ public class BagMouth : MonoBehaviour {
     }
 
     private void snapSwordToMouth(Blade blade) {
+        Sword sword = blade.GetComponentInParent<Sword>();
+
+        Transform snapPoint = transform.Find("Snap Point");
         float bagAngle = transform.eulerAngles.z;
 
-        CircleCollider2D bagMouthCollider = GetComponent<CircleCollider2D>();
-        CircleCollider2D bladeTipCollider = blade.GetComponentInChildren<CircleCollider2D>();
-
-        float xDiff = bladeTipCollider.transform.position.x - bagMouthCollider.transform.position.x;
-        float yDiff = bladeTipCollider.transform.position.y - bagMouthCollider.transform.position.y;
-
-        Sword sword = blade.GetComponentInParent<Sword>();
-        sword.transform.position = new Vector3(sword.transform.position.x - xDiff, sword.transform.position.y - yDiff, sword.transform.position.z);
-        sword.lockSword(bagAngle);
+        sword.lockSword(bagAngle, snapPoint.position);
     }
 
     
