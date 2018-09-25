@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 
 public class Sword : Item {
-
     private Blade blade;
-    public bool movementConstrained { get; set; }
+    public bool sheathingSword { get; set; }
 
     private Vector2 unitVector;
 
@@ -11,29 +10,30 @@ public class Sword : Item {
         base.Start();
         blade = GetComponentInChildren<Blade>();
         calculateUnitVector();
-        movementConstrained = false;
+        sheathingSword = false;
     }
 
-    protected override void leftClick() {
-        base.leftClick();
-
-        if (movementConstrained) {
+    public override void leftClick() {
+        if (sheathingSword) {
             offset = calculateProjectedMouseVectorOntoUnitVector();
+        }
+        else {
+            base.leftClick();
         }
     }
 
     protected override void dragItem() {
-        if (movementConstrained) {
+        if (sheathingSword) {
             Vector2 projectedVector = calculateProjectedMouseVectorOntoUnitVector();
             transform.position += new Vector3(projectedVector.x, projectedVector.y, 0) - offset;
-        } 
+        }
         else {
             base.dragItem();
         }
     }
 
-    protected override void rotateItem() {
-        if (!movementConstrained) {
+    public override void rotateItem() {
+        if (!sheathingSword) {
             base.rotateItem();
             calculateUnitVector();
         }
@@ -64,7 +64,8 @@ public class Sword : Item {
     public void lockSword(float bagAngle, Vector3 position) {
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, bagAngle + 180);
         transform.position = position;
-        movementConstrained = true;
+        sheathingSword = true;
         offset = calculateProjectedMouseVectorOntoUnitVector();
     }
+
 }

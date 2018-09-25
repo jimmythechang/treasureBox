@@ -10,6 +10,11 @@ public class Item : MonoBehaviour {
     protected float initialMouseAngleRelativeToObject;
     protected Vector3 offset;
 
+    /*
+     * A parent Item that this Item might be contained in.
+     */
+    protected Item parentItem;
+
     protected enum State { DRAGGING, ROTATING, UNTOUCHED };
     protected State state = State.UNTOUCHED;
 
@@ -43,32 +48,42 @@ public class Item : MonoBehaviour {
     /**
      * Action to execute if the Item is clicked on with the left mouse button.
      */
-    protected virtual void leftClick() {
-        offset = calculateOffset();
-        state = State.DRAGGING;
-        setItemSortingOrder(10);
+    public virtual void leftClick() {
+        if (parentItem == null) {
+            offset = calculateOffset();
+            state = State.DRAGGING;
+            setItemSortingOrder(10);
+        }
+        else {
+            parentItem.leftClick();
+        }
+
     }
 
     /**
      * Action to execute if the Item is clicked on with the right mouse button.
      */
-    protected void rightClick() {
-        /*
-         * Set the initial orientation of the Item and the initial angle of the mouse
-         * relative to that orientation.
-         */
-        initialZRotation = transform.eulerAngles.z;
-        initialMouseAngleRelativeToObject = calculateAngleOfMouseRelativeToGameObject();
-        state = State.ROTATING;
+    public virtual void rightClick() {
+        if (parentItem == null) {
+            /*
+             * Set the initial orientation of the Item and the initial angle of the mouse
+             * relative to that orientation.
+             */
+            initialZRotation = transform.eulerAngles.z;
+            initialMouseAngleRelativeToObject = calculateAngleOfMouseRelativeToPoint(transform.position);
+            state = State.ROTATING;
+        }
+        else {
+            parentItem.rightClick();
+        }
     }
 
     /**
      * Action to execute if the Item is no longer being handled by the Player.
      */
-    public void release() {
-        state = State.UNTOUCHED;
-        isInChest = isWithinChest();
-        setItemSortingOrder(0);
+    public virtual void release() {
+       state = State.UNTOUCHED;
+       setItemSortingOrder(0);
     }
 
     /**
@@ -76,12 +91,12 @@ public class Item : MonoBehaviour {
      * including those of its children.
      */
     private void setItemSortingOrder(int sortingOrder) {
-        if (gameObject.GetComponent<SpriteRenderer>() != null) {
-            gameObject.GetComponent<SpriteRenderer>().sortingOrder = sortingOrder;
+        if (GetComponent<SpriteRenderer>() != null) {
+            GetComponent<SpriteRenderer>().sortingOrder = sortingOrder;
         }
 
-        if (gameObject.GetComponentsInChildren<SpriteRenderer>().Length > 0) {
-            SpriteRenderer[] renderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
+        if (GetComponentsInChildren<SpriteRenderer>().Length > 0) {
+            SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
             for (int i = 0; i < renderers.Length; i++) {
                 renderers[i].sortingOrder = sortingOrder;
             }
@@ -97,25 +112,35 @@ public class Item : MonoBehaviour {
     }
 
     protected virtual void dragItem() {
-        Vector3 mouseGamePosition = calculateMouseGamePosition();
-        transform.position = mouseGamePosition + offset;
+        if (parentItem == null) {
+            Vector3 mouseGamePosition = calculateMouseGamePosition();
+            transform.position = mouseGamePosition + offset;
+        }
+        else {
+            parentItem.dragItem();
+        }
     }
 
     /**
      * Finds the value of the angle whose tangent is equal to 
-     * [mouseGamePosition.y - gameObject.transform.position.y] / [mouseGamePosition.x - gameObject.transform.position.x].
+     * [mouseGamePosition.y - point.y] / [mouseGamePosition.x - point.x].
      */
-    protected float calculateAngleOfMouseRelativeToGameObject() {
+    protected float calculateAngleOfMouseRelativeToPoint(Vector3 point) {
         Vector3 mouseGamePosition = calculateMouseGamePosition();
-        float yDiff = mouseGamePosition.y - gameObject.transform.position.y;
-        float xDiff = mouseGamePosition.x - gameObject.transform.position.x;
+        float yDiff = mouseGamePosition.y - point.y;
+        float xDiff = mouseGamePosition.x - point.x;
         return Mathf.Atan2(yDiff, xDiff) * Mathf.Rad2Deg;
     }
 
-    protected virtual void rotateItem() {
-        float angle = calculateAngleOfMouseRelativeToGameObject();
-        float zRotation = (initialZRotation + (angle - initialMouseAngleRelativeToObject)) % 360;
-        transform.eulerAngles = new Vector3(0, 0, zRotation);
+    public virtual void rotateItem() {
+        if (parentItem == null) {
+            float angle = calculateAngleOfMouseRelativeToPoint(transform.position);
+            float zRotation = (initialZRotation + (angle - initialMouseAngleRelativeToObject)) % 360;
+            transform.eulerAngles = new Vector3(0, 0, zRotation);
+        }
+        else {
+            parentItem.rotateItem();
+        }
     }
 
     /**
@@ -128,15 +153,15 @@ public class Item : MonoBehaviour {
     }
 
     protected void OnTriggerStay2D(Collider2D collision) {
-        if (gameObject.GetComponent<Renderer>() != null) {
-            gameObject.GetComponent<Renderer>().material.color = Color.red;
+        if (GetComponent<Renderer>() != null) {
+            GetComponent<Renderer>().material.color = Color.red;
         }
         isTouchingAnotherItem = true;
     }
 
     protected void OnTriggerExit2D(Collider2D collision) {
-        if (gameObject.GetComponent<Renderer>() != null) {
-            gameObject.GetComponent<Renderer>().material.color = Color.white;
+        if (GetComponent<Renderer>() != null) {
+            GetComponent<Renderer>().material.color = Color.white;
         }
         isTouchingAnotherItem = false;
     }
@@ -146,4 +171,14 @@ public class Item : MonoBehaviour {
     protected Vector3 calculateMouseGamePosition() {
         return Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, zDiff));
     }
+
+    public Item getParentItem() {
+        return parentItem;
+    }
+
+    public void setParentItem(Item parentItem) {
+        this.parentItem = parentItem;
+        transform.SetParent(parentItem.transform);
+    }
+
 }

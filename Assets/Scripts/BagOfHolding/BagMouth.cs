@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class BagMouth : MonoBehaviour {
-
+    public GameObject swordAndBagParent;
     private BagOfHolding bagOfHolding;
 
     protected void Start() {
@@ -36,10 +35,17 @@ public class BagMouth : MonoBehaviour {
         float bagAngle = transform.eulerAngles.z;
 
         sword.lockSword(bagAngle, snapPoint.position);
+        setSwordAndBagParent(sword);
     }
 
     
-    
+    private void setSwordAndBagParent(Sword sword) {
+        swordAndBagParent.transform.position = transform.position;
+        bagOfHolding.setParentItem(swordAndBagParent.GetComponent<Item>());
+        sword.setParentItem(swordAndBagParent.GetComponent<Item>());
+    }
+
+      
 }
 
 

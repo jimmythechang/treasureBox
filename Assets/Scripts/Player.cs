@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    private Item heldItem;
+    public Item heldItem { get; set; }
 
 	// Use this for initialization
 	void Start () {
@@ -43,12 +43,18 @@ public class Player : MonoBehaviour {
 
     /**
      * Sets the heldItem for the Player if the object clicked was an Item.
+     * 
      * <param name="message">Method to invoke on the clicked GameObject.</param>
      */
     private void clickOnObject(string message) {
         GameObject clickedObject = sendMessageToObject(message);
         if (clickedObject != null && clickedObject.GetComponent<Item>()) {
             heldItem = clickedObject.GetComponent<Item>();
+
+            // If the Item has a parent, hold that instead!
+            while (heldItem.getParentItem() != null) {
+                heldItem = heldItem.getParentItem();
+            }
         }
     }
 }

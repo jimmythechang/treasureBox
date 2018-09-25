@@ -1,17 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class BagOfHolding : Item {
 
-    public bool swordInserted { get; set; }
+    private BagMouth bagMouth;
 
-    // Use this for initialization
-    void Start() {
-
-    }
-
-    // Update is called once per frame
-    void Update() {
-
+    protected override void Start() {
+        base.Start();
+        bagMouth = GetComponentInChildren<BagMouth>();
     }
 }
