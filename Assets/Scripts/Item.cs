@@ -10,6 +10,7 @@ public class Item : MonoBehaviour {
     protected float initialMouseAngleRelativeToObject;
     protected Vector3 offset;
 
+
     /*
      * A parent Item that this Item might be contained in.
      */
@@ -22,10 +23,12 @@ public class Item : MonoBehaviour {
     public bool isTouchingAnotherItem { get; set; }
 
     private GameObject chest;
+    protected Player player;
 
     protected virtual void Start() {
         zDiff = transform.position.z - Camera.main.transform.position.z;
         chest = GameObject.FindGameObjectWithTag("Chest");
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         isTouchingAnotherItem = false;
     }
 
@@ -49,33 +52,22 @@ public class Item : MonoBehaviour {
      * Action to execute if the Item is clicked on with the left mouse button.
      */
     public virtual void leftClick() {
-        if (parentItem == null) {
-            offset = calculateOffset();
-            state = State.DRAGGING;
-            setItemSortingOrder(10);
-        }
-        else {
-            parentItem.leftClick();
-        }
-
+        offset = calculateOffset();
+        state = State.DRAGGING;
+        setItemSortingOrder(10);
     }
 
     /**
      * Action to execute if the Item is clicked on with the right mouse button.
      */
     public virtual void rightClick() {
-        if (parentItem == null) {
-            /*
-             * Set the initial orientation of the Item and the initial angle of the mouse
-             * relative to that orientation.
-             */
-            initialZRotation = transform.eulerAngles.z;
-            initialMouseAngleRelativeToObject = calculateAngleOfMouseRelativeToPoint(transform.position);
-            state = State.ROTATING;
-        }
-        else {
-            parentItem.rightClick();
-        }
+        /*
+            * Set the initial orientation of the Item and the initial angle of the mouse
+            * relative to that orientation.
+            */
+        initialZRotation = transform.eulerAngles.z;
+        initialMouseAngleRelativeToObject = calculateAngleOfMouseRelativeToPoint(transform.position);
+        state = State.ROTATING;
     }
 
     /**
@@ -112,13 +104,8 @@ public class Item : MonoBehaviour {
     }
 
     protected virtual void dragItem() {
-        if (parentItem == null) {
-            Vector3 mouseGamePosition = calculateMouseGamePosition();
-            transform.position = mouseGamePosition + offset;
-        }
-        else {
-            parentItem.dragItem();
-        }
+        Vector3 mouseGamePosition = calculateMouseGamePosition();
+        transform.position = mouseGamePosition + offset;
     }
 
     /**
@@ -133,14 +120,9 @@ public class Item : MonoBehaviour {
     }
 
     public virtual void rotateItem() {
-        if (parentItem == null) {
-            float angle = calculateAngleOfMouseRelativeToPoint(transform.position);
-            float zRotation = (initialZRotation + (angle - initialMouseAngleRelativeToObject)) % 360;
-            transform.eulerAngles = new Vector3(0, 0, zRotation);
-        }
-        else {
-            parentItem.rotateItem();
-        }
+        float angle = calculateAngleOfMouseRelativeToPoint(transform.position);
+        float zRotation = (initialZRotation + (angle - initialMouseAngleRelativeToObject)) % 360;
+        transform.eulerAngles = new Vector3(0, 0, zRotation);
     }
 
     /**
@@ -172,13 +154,20 @@ public class Item : MonoBehaviour {
         return Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, zDiff));
     }
 
-    public Item getParentItem() {
-        return parentItem;
+    /**
+     * Recursively returns the topmost parentItem of this Item; otherwise returns the Item itself.
+     */
+    public virtual Item getParentItem() {
+        Item item = this;
+        while (item.parentItem != null) {
+            item = item.parentItem;
+        }
+        return item;
     }
 
-    public void setParentItem(Item parentItem) {
+    public virtual void setParentItem(Item parentItem) {
+        release();
         this.parentItem = parentItem;
         transform.SetParent(parentItem.transform);
     }
-
 }

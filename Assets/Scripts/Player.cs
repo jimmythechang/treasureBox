@@ -31,30 +31,23 @@ public class Player : MonoBehaviour {
      * Sends a message to a clicked GameObject, if one is found.
      * <param name="message">Method to invoke on the clicked GameObject.</param>
      */
-    private GameObject sendMessageToObject(string message) {
+    private void clickOnObject(string message) {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-        if (hit) {
-            hit.transform.gameObject.SendMessage(message);
-            return hit.transform.gameObject;
+        if (hit && hit.transform.gameObject != null) {
+            holdItem(hit.transform.gameObject, message);
         }
-        return null;
     }
 
     /**
-     * Sets the heldItem for the Player if the object clicked was an Item.
-     * 
-     * <param name="message">Method to invoke on the clicked GameObject.</param>
+     * Sets the heldItem for the Player if the GameObject provided is an Item.
      */
-    private void clickOnObject(string message) {
-        GameObject clickedObject = sendMessageToObject(message);
-        if (clickedObject != null && clickedObject.GetComponent<Item>()) {
-            heldItem = clickedObject.GetComponent<Item>();
-
-            // If the Item has a parent, hold that instead!
-            while (heldItem.getParentItem() != null) {
-                heldItem = heldItem.getParentItem();
-            }
+    public void holdItem(GameObject gameObject, string message) {
+        if (gameObject.GetComponent<Item>() != null) {
+            heldItem = gameObject.GetComponent<Item>().getParentItem();
+            heldItem.SendMessage(message);
         }
     }
+
+    
 }

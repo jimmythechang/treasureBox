@@ -9,13 +9,14 @@ public class Sword : Item {
     protected override void Start() {
         base.Start();
         blade = GetComponentInChildren<Blade>();
-        calculateUnitVector();
         sheathingSword = false;
     }
 
     public override void leftClick() {
         if (sheathingSword) {
+            calculateUnitVector();
             offset = calculateProjectedMouseVectorOntoUnitVector();
+            state = State.DRAGGING;
         }
         else {
             base.leftClick();
@@ -35,8 +36,11 @@ public class Sword : Item {
     public override void rotateItem() {
         if (!sheathingSword) {
             base.rotateItem();
-            calculateUnitVector();
         }
+    }
+
+    public override Item getParentItem() {
+        return this;
     }
 
     /**

@@ -44,8 +44,6 @@ public class BagMouth : MonoBehaviour {
         bagOfHolding.setParentItem(swordAndBagParent.GetComponent<Item>());
         sword.setParentItem(swordAndBagParent.GetComponent<Item>());
     }
-
-      
 }
 
 
