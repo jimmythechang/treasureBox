@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 
 public class Sword : Item {
-    private Blade blade;
+
     public bool sheathingSword { get; set; }
 
     private Vector2 unitVector;
 
     protected override void Start() {
         base.Start();
-        blade = GetComponentInChildren<Blade>();
         sheathingSword = false;
     }
 
@@ -47,7 +46,7 @@ public class Sword : Item {
      * Calculates the unit vector facing in the direction that the blade is pointing.
      */
     private void calculateUnitVector() {
-        Transform colliderTransform = blade.GetComponentInChildren<CircleCollider2D>().transform;
+        Transform colliderTransform = GetComponentInChildren<CircleCollider2D>().transform;
         unitVector = new Vector2(colliderTransform.position.x - transform.position.x, colliderTransform.position.y - transform.position.y);
         unitVector.Normalize();
     }
