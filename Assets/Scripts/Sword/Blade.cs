@@ -2,19 +2,24 @@
 
 public class Blade : Item {
 
+    private Sword sword;
+
     public bool isVisible { get; set; }
 
-    void Start() {
-        isVisible = true;    
+    protected override void Start() {
+        sword = GetComponentInParent<Sword>();
+        setParentItem(sword);
+
+        isVisible = true;
     }
 
-    void Update() {
+    protected override void Update() {
         //GetComponent<SpriteRenderer>().enabled = isVisible;
     }
 
+
     private void OnTriggerEnter2D(Collider2D collision) {
-
+        
     }
-
 
 }

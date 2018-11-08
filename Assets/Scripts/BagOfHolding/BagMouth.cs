@@ -12,27 +12,29 @@ public class BagMouth : MonoBehaviour {
         /*
          * We're only interested in the collision of the Blade Tip.
          */
-        Sword sword = collision.gameObject.GetComponentInParent<Sword>();
-        if (sword != null && swordIsCloseToBagMouth(sword)) {
-            snapSwordToMouth(sword);
+        Blade blade = collision.gameObject.GetComponentInParent<Blade>();
+        if (blade != null && collision.gameObject.name == "Blade Tip" && bladeIsCloseToBagMouth(blade)) {
+            snapSwordToMouth(blade);
         }
     }
 
-    private bool swordIsCloseToBagMouth(Sword sword) {
-        float swordAngle = sword.transform.eulerAngles.z;
+
+    private bool bladeIsCloseToBagMouth(Blade blade) {
+        float bladeAngle = blade.transform.eulerAngles.z;
         float bagAngle = transform.eulerAngles.z;
 
         /*
          * Determine if the Sword is correctly pointing into the Bag.
          */
-        return (Mathf.Abs(Mathf.Abs(swordAngle - bagAngle) - 180) <= 5);
+        return (Mathf.Abs(Mathf.Abs(bladeAngle - bagAngle) - 180) <= 5);
     }
 
-    private void snapSwordToMouth(Sword sword) {
+    private void snapSwordToMouth(Blade blade) {
         Transform snapPoint = transform.Find("Snap Point");
         float bagAngle = transform.eulerAngles.z;
 
-        sword.lockSword(bagAngle, snapPoint.position);
+        Sword sword = blade.GetComponentInParent<Sword>();
+        sword.lockSword(bagAngle, snapPoint);
         setSwordAndBagParent(sword);
     }
 

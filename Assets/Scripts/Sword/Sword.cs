@@ -2,17 +2,20 @@
 
 public class Sword : Item {
 
-    public bool sheathingSword { get; set; }
+    public bool isSheathing { get; set; }
 
     private Vector2 unitVector;
 
+    // A reference to the transform of the SnapPoint in the BagMouth.
+    private Transform snapPoint;
+
     protected override void Start() {
         base.Start();
-        sheathingSword = false;
+        isSheathing = false;
     }
 
     public override void leftClick() {
-        if (sheathingSword) {
+        if (isSheathing) {
             calculateUnitVector();
             offset = calculateProjectedMouseVectorOntoUnitVector();
             state = State.DRAGGING;
@@ -23,9 +26,14 @@ public class Sword : Item {
     }
 
     protected override void dragItem() {
-        if (sheathingSword) {
+        if (isSheathing) {
             Vector2 projectedVector = calculateProjectedMouseVectorOntoUnitVector();
             transform.position += new Vector3(projectedVector.x, projectedVector.y, 0) - offset;
+
+            // Prevent the Sword from being dragged away from the BagMouth.
+            if (isSwordBeingMovedTooFarAway()) {
+                transform.position = snapPoint.position;
+            }
         }
         else {
             base.dragItem();
@@ -33,7 +41,7 @@ public class Sword : Item {
     }
 
     public override void rotateItem() {
-        if (!sheathingSword) {
+        if (!isSheathing) {
             base.rotateItem();
         }
     }
@@ -46,7 +54,7 @@ public class Sword : Item {
      * Calculates the unit vector facing in the direction that the blade is pointing.
      */
     private void calculateUnitVector() {
-        Transform colliderTransform = GetComponentInChildren<CircleCollider2D>().transform;
+        Transform colliderTransform = transform.Find("Blade Tip");
         unitVector = new Vector2(colliderTransform.position.x - transform.position.x, colliderTransform.position.y - transform.position.y);
         unitVector.Normalize();
     }
@@ -64,11 +72,24 @@ public class Sword : Item {
     /**
      * Constrains the sword along the axis of the bag. 
      */
-    public void lockSword(float bagAngle, Vector3 position) {
+    public void lockSword(float bagAngle, Transform snapPoint) {
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, bagAngle + 180);
-        transform.position = position;
-        sheathingSword = true;
+        transform.position = snapPoint.position;
+
+        this.snapPoint = snapPoint;
+
+        isSheathing = true;
         offset = calculateProjectedMouseVectorOntoUnitVector();
+    }
+
+    /**
+     * Determine if the Sword is being moved too far away from the SnapPoint present in the BagMouth.
+     */
+    private bool isSwordBeingMovedTooFarAway() {
+        float xSign = Mathf.Sign(unitVector.x) * -1;
+        float ySign = Mathf.Sign(unitVector.y) * -1;
+        return (transform.position.x * xSign > snapPoint.position.x * xSign) && 
+               (transform.position.y * ySign > snapPoint.position.y * ySign);
     }
 
 }
