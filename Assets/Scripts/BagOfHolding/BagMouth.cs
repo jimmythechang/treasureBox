@@ -21,7 +21,7 @@ public class BagMouth : MonoBehaviour {
          * We're only interested in the collision of the Blade Tip.
          */
         Blade blade = collision.gameObject.GetComponentInParent<Blade>();
-        if (blade != null && collision.gameObject.name == "Blade Tip" && bladeIsCloseToBagMouth(blade)) {
+        if (blade != null && collision.gameObject.name == "Blade 0" && bladeIsCloseToBagMouth(blade)) {
             snapSwordToMouth(blade);
         }
     }
@@ -37,16 +37,14 @@ public class BagMouth : MonoBehaviour {
     }
 
     private void snapSwordToMouth(Blade blade) {
-        Transform snapPoint = transform.Find("Snap Point");
         float bagAngle = transform.eulerAngles.z;
 
         Sword sword = blade.GetComponentInParent<Sword>();
   
-        sword.lockSword(bagAngle, snapPoint);
+        sword.lockSword(bagAngle, this);
 
-        float distanceFromBagMouth = sword.getDistanceFromBagMouth();
+        float distanceFromBagMouth = sword.calculateDistanceFromBagMouth();
         sword.setInitialDistanceFromBagMouth(distanceFromBagMouth);
-        sword.setDistanceFromBagMouth(distanceFromBagMouth);
         setSwordAndBagParent(sword);
     }
 
