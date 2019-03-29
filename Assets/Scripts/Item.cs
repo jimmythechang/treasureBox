@@ -82,7 +82,7 @@ public class Item : MonoBehaviour {
      * Sets the sorting order for all SpriteRenderers associated with this Item, 
      * including those of its children.
      */
-    private void setItemSortingOrder(int sortingOrder) {
+    public void setItemSortingOrder(int sortingOrder) {
         if (GetComponent<SpriteRenderer>() != null) {
             GetComponent<SpriteRenderer>().sortingOrder = sortingOrder;
         }

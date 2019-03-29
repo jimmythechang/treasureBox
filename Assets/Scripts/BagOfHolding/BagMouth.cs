@@ -1,11 +1,19 @@
 ﻿using UnityEngine;
-
+ 
 public class BagMouth : MonoBehaviour {
+
+    /***********************
+     * EXTERNAL REFERENCES *
+     ***********************/
+     
+    // A reference to a GameObject that will ultimately contain both the Sword and BagOfHolding.
     public GameObject swordAndBagParent;
-    private BagOfHolding bagOfHolding;
+
+    // A reference to the BagOfHolding object, which is the immediate parent of the BagMouth.
+    private Item bagOfHolding;
 
     protected void Start() {
-        bagOfHolding = GetComponentInParent<BagOfHolding>();
+        bagOfHolding = GetComponentInParent<Item>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {
@@ -17,7 +25,6 @@ public class BagMouth : MonoBehaviour {
             snapSwordToMouth(blade);
         }
     }
-
 
     private bool bladeIsCloseToBagMouth(Blade blade) {
         float bladeAngle = blade.transform.eulerAngles.z;
@@ -34,7 +41,12 @@ public class BagMouth : MonoBehaviour {
         float bagAngle = transform.eulerAngles.z;
 
         Sword sword = blade.GetComponentInParent<Sword>();
+  
         sword.lockSword(bagAngle, snapPoint);
+
+        float distanceFromBagMouth = sword.getDistanceFromBagMouth();
+        sword.setInitialDistanceFromBagMouth(distanceFromBagMouth);
+        sword.setDistanceFromBagMouth(distanceFromBagMouth);
         setSwordAndBagParent(sword);
     }
 
@@ -43,6 +55,8 @@ public class BagMouth : MonoBehaviour {
         swordAndBagParent.transform.position = transform.position;
         bagOfHolding.setParentItem(swordAndBagParent.GetComponent<Item>());
         sword.setParentItem(swordAndBagParent.GetComponent<Item>());
+
+        bagOfHolding.setItemSortingOrder(10);
     }
 }
 

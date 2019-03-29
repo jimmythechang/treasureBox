@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+
 public class Blade : Item {
 
     private Sword sword;
@@ -14,12 +15,26 @@ public class Blade : Item {
     }
 
     protected override void Update() {
-        //GetComponent<SpriteRenderer>().enabled = isVisible;
+        GetComponent<SpriteRenderer>().enabled = isVisible;
     }
 
-
-    private void OnTriggerEnter2D(Collider2D collision) {
-        
+    /**
+     * If the Blade is invisible, we do not want to propagate clicks to its parentItem.
+     */
+    public override Item getParentItem() {
+        if (isVisible) {
+            return base.getParentItem();
+        }
+        else {
+            return this;
+        }
     }
+
+    public override void leftClick() {
+        if (!isVisible) {
+            return;
+        }
+    }
+
 
 }
