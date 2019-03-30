@@ -18,11 +18,21 @@ public class BagMouth : MonoBehaviour {
 
     private void OnTriggerEnter2D(Collider2D collision) {
         /*
-         * We're only interested in the collision of the Blade Tip.
+         * We're interested in the collision of the Blade tip or the Hilt. 
          */
-        Blade blade = collision.gameObject.GetComponentInParent<Blade>();
-        if (blade != null && collision.gameObject.name == "Blade 0" && bladeIsCloseToBagMouth(blade)) {
-            snapSwordToMouth(blade);
+        if (collision.gameObject.name == "Blade 0") {
+            Blade blade = collision.gameObject.GetComponentInParent<Blade>();
+            if (bladeIsCloseToBagMouth(blade)) {
+                snapSwordToMouth(blade);
+            }
+        }
+        else if (collision.gameObject.name == "Hilt") {
+            Sword sword = collision.gameObject.GetComponentInParent<Sword>();
+            if (sword.isSheathing) {
+                sword.isSheathing = false;
+                sword.isLocked = true;
+                sword.release();
+            }
         }
     }
 

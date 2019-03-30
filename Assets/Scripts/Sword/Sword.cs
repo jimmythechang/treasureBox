@@ -11,15 +11,15 @@ public class Sword : Item {
     // A reference to the BagMouth.
     private BagMouth bagMouth;
 
+
     // A List containing Blades.
     private List<Blade> blades = new List<Blade>();
 
     public bool isSheathing { get; set; }
+    public bool isLocked { get; set; }
 
     private Vector2 unitVector;
-
     private float initialDistanceFromBagMouth;
-    //private float distanceFromBagMouth;
 
     protected override void Start() {
         base.Start();
@@ -37,25 +37,6 @@ public class Sword : Item {
     protected override void Update() {
         base.Update();
     }
-
-    /**
-     * Determines which of the Blades have been inserted into the Bag
-     * and need to be hidden/activated accordingly.
-     */
-    private void displayBladeSegments(float percentageInserted) {
-        int segmentHidden = (int) Mathf.Floor(4 * percentageInserted);
-
-        for (int i = 0; i < segmentHidden; i++) {
-            blades[i].isVisible = false;
-            blades[i].GetComponent<PolygonCollider2D>().enabled = false;
-        }
-
-        for (int i = segmentHidden; i < 4; i++) {
-            blades[i].isVisible = true;
-            blades[i].GetComponent<PolygonCollider2D>().enabled = true;
-        }
-    }
-
 
     public override void leftClick() {
         if (isSheathing) {
@@ -92,8 +73,29 @@ public class Sword : Item {
         }
     }
 
+    /**
+     * Determines which of the Blades have been inserted into the Bag
+     * and need to be hidden/activated accordingly.
+     */
+    private void displayBladeSegments(float percentageInserted) {
+        int segmentHidden = (int)Mathf.Floor(4 * percentageInserted);
+
+        for (int i = 0; i < segmentHidden; i++) {
+            blades[i].isVisible = false;
+            blades[i].GetComponent<PolygonCollider2D>().enabled = false;
+        }
+
+        for (int i = segmentHidden; i < 4; i++) {
+            blades[i].isVisible = true;
+            blades[i].GetComponent<PolygonCollider2D>().enabled = true;
+        }
+    }
+
     public override Item getParentItem() {
-        return this;
+        if (!isLocked) {
+            return this;
+        }
+        return base.getParentItem();
     }
 
     /**
